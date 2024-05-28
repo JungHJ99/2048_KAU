@@ -13,7 +13,7 @@
 #include <curses.h>
 #include <string.h>
 #include <time.h>
-#include <assert.hu>
+#include <assert.h>
 #include <unistd.h>
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -22,29 +22,31 @@
 #define NCOLS NROWS
 
 static const char *usage =
-	"2048: A sliding tile puzzle game\n\n"
-	"Usage: %s [-m M] [-r R] [-p P] [-s SEED] [-h]\n\n"
-	"\t-m\tM\tGame mode M\n"
-	"\t\t\t[1]: Normal mode\n"
-	"\t\t\t[2]: Bomb mode (Start with a bomb tile 0 which moves but won't be combined) \n"
-	"\t\t\t[3]: Chance mode (Start with a bomb tile 0 which moves but won't be combined) \n"
-	"\t-r\tR\tRecord to file R\n"
-	"\t-p\tP\tPlay back from file P\n"
-	"\t-s\tSEED \tUse SEED for the random number generator\n"
-	"\t-d\tDELAY\tDelay for DELAY ms when playing back\n"
-	"\t-h\t\tShow this message\n";
+		"2048: A sliding tile puzzle game\n\n"
+		"Usage: %s [-m M] [-r R] [-p P] [-s SEED] [-h]\n\n"
+		"\t-m\tM\tGame mode M\n"
+		"\t\t\t[1]: Normal mode\n"
+		"\t\t\t[2]: Bomb mode (Start with a bomb tile 0 which moves but won't be combined) \n"
+		"\t\t\t[3]: Chance mode (Start with a bomb tile 0 which moves but won't be combined) \n"
+		"\t-r\tR\tRecord to file R\n"
+		"\t-p\tP\tPlay back from file P\n"
+		"\t-s\tSEED \tUse SEED for the random number generator\n"
+		"\t-d\tDELAY\tDelay for DELAY ms when playing back\n"
+		"\t-h\t\tShow this message\n";
 
 typedef int tile;
 
-struct game {
+struct game
+{
 	int turns, score;
 	tile board[NROWS][NCOLS];
 };
 
 // tiles for new mode
-typedef enum {
-    Number,
-    Bomb,
+typedef enum
+{
+	Number,
+	Bomb,
 	Chance
 } TileType;
 
@@ -61,11 +63,13 @@ int place_tile(struct game *game, TileType tile_type)
 	int i, num_zeros = 0;
 
 	// Walk the board and count the number of empty tiles
-	for (i = 0; i < NROWS * NCOLS; i++) {
+	for (i = 0; i < NROWS * NCOLS; i++)
+	{
 		num_zeros += lboard[i] ? 0 : 1;
 	}
 
-	if (!num_zeros) {
+	if (!num_zeros)
+	{
 		return -1;
 	}
 
@@ -73,24 +77,32 @@ int place_tile(struct game *game, TileType tile_type)
 	int loc = random() % num_zeros;
 
 	// Find the insertion point and place the new tile
-	for (i = 0; i < NROWS * NCOLS; i++) {
-		if (!lboard[i] && !(loc--)) {
-			switch(tile_type){
-				case Number:
-					lboard[i] = 1; //초기 숫자 2만 뜨게하기
-					return 0;
-				case Bomb:
-					lboard[i] = 15;  // Bomb num = 15
-					return 0;
-				case Chance:
-					if (random() % 10 < 1) {
-						lboard[i] = 2;
-					} else if (random() % 10 == 9) { // precentage of Chance: 1/30 
-						lboard[i] = 16; // Chance num = 16
-					} else {
-						lboard[i] = 1;
-					}
-					return 0;
+	for (i = 0; i < NROWS * NCOLS; i++)
+	{
+		if (!lboard[i] && !(loc--))
+		{
+			switch (tile_type)
+			{
+			case Number:
+				lboard[i] = random() % 10 ? 1 : 2;
+				return 0;
+			case Bomb:
+				lboard[i] = 15; // Bomb num = 15
+				return 0;
+			case Chance:
+				if (random() % 10 < 1)
+				{
+					lboard[i] = 2;
+				}
+				else if (random() % 10 == 9)
+				{									// precentage of Chance: 1/30
+					lboard[i] = 16; // Chance num = 16
+				}
+				else
+				{
+					lboard[i] = 1;
+				}
+				return 0;
 			}
 		}
 	}
@@ -99,24 +111,30 @@ int place_tile(struct game *game, TileType tile_type)
 
 void print_tile(int tile)
 {
-	if (tile) {
-		if (tile < 6) {
+	if (tile)
+	{
+		if (tile < 6)
+		{
 			attron(A_BOLD);
 		}
-		if (tile == 15) { // Bomb tile
+		if (tile == 15)
+		{ // Bomb tile
 			int pair = COLOR_PAIR(7);
 			attron(pair);
 			attron(A_BOLD);
 			printw("   X");
 			attroff(pair);
-		} else if (tile == 16) { // Chance tile
+		}
+		else if (tile == 16)
+		{ // Chance tile
 			int pair = COLOR_PAIR(7);
 			attron(pair);
 			attron(A_BOLD);
 			printw("   O");
 			attroff(pair);
 		}
-		else {
+		else
+		{
 			int pair = COLOR_PAIR(1 + (tile % 6));
 			attron(pair);
 			printw("%4d", 1 << tile);
@@ -124,7 +142,8 @@ void print_tile(int tile)
 		}
 		attroff(A_BOLD);
 	}
-	else {
+	else
+	{
 		printw("   .");
 	}
 }
@@ -134,8 +153,10 @@ void print_game(const struct game *game)
 	int r, c;
 	move(0, 0);
 	printw("Score: %6d  Turns: %4d", game->score, game->turns);
-	for (r = 0; r < NROWS; r++) {
-		for (c = 0; c < NCOLS; c++) {
+	for (r = 0; r < NROWS; r++)
+	{
+		for (c = 0; c < NCOLS; c++)
+		{
 			move(r + 2, 5 * c);
 			print_tile(game->board[r][c]);
 		}
@@ -147,31 +168,41 @@ void print_game(const struct game *game)
 int combine_left(struct game *game, tile row[NCOLS])
 {
 	int c, did_combine = 0;
-	for (c = 1; c < NCOLS; c++) {
-		if (row[c]) {
-			if (row[c-1] == 16 && row[c] == 16) { // chance-chance combine -> becomes 2
-				row[c-1] = 2;
+	for (c = 1; c < NCOLS; c++)
+	{
+		if (row[c])
+		{
+			if (row[c - 1] == 16 && row[c] == 16)
+			{ // chance-chance combine -> becomes 2
+				row[c - 1] = 2;
 				row[c] = 0;
-				game->score += 2 << (row[c-1] - 1);
+				game->score += 4; // 점수 계산
 				did_combine = 1;
-			} else if (row[c-1] == row[c]) {
-				row[c-1]++;
+				printf("Combined 16 and 16 to 2, score: %d\n", game->score);
+			}
+			else if (row[c - 1] == row[c])
+			{
+				row[c - 1]++;
 				row[c] = 0;
-				game->score += 2 << (row[c-1] - 1);
+				game->score += (1 << row[c - 1]); // 점수 계산 (2^(row[c-1]))
 				did_combine = 1;
-			} else if (row[c-1] == 16 || row[c] == 16) { // chance-number combine 
-				tile combined_num = row[c-1] == 16 ? row[c] : row[c-1]; // to find combined number
-				row[c-1] = combined_num + 1;
+				printf("Combined %d and %d to %d, score: %d\n", row[c - 1] - 1, row[c - 1] - 1, row[c - 1], game->score);
+			}
+			else if (row[c - 1] == 16 || row[c] == 16)
+			{ // chance-number combine
+				tile combined_num = row[c - 1] == 16 ? row[c] : row[c - 1];
+				row[c - 1] = combined_num + 1;
 				row[c] = 0;
-				game->score += 2 << (row[c-1] - 1);
+				game->score += (1 << (combined_num + 1)); // 점수 계산 (2^(combined_num + 1))
 				did_combine = 1;
+				printf("Combined chance and %d to %d, score: %d\n", combined_num, combined_num + 1, game->score);
 			}
 		}
 	}
+	check_and_record_achievements(game->score);
 	return did_combine;
 }
 
-// deflate_left() returns nonzero if it did deflate, and 0 otherwise
 int deflate_left(tile row[NCOLS])
 {
 	tile buf[NCOLS] = {0};
@@ -179,8 +210,10 @@ int deflate_left(tile row[NCOLS])
 	int did_deflate = 0;
 	int in;
 
-	for (in = 0; in < NCOLS; in++) {
-		if (row[in] != 0) {
+	for (in = 0; in < NCOLS; in++)
+	{
+		if (row[in] != 0)
+		{
 			*out++ = row[in];
 			did_deflate |= buf[in] != row[in];
 		}
@@ -196,8 +229,10 @@ void rotate_clockwise(struct game *game)
 	memcpy(buf, game->board, sizeof(game->board));
 
 	int r, c;
-	for (r = 0; r < NROWS; r++) {
-		for (c = 0; c < NCOLS; c++) {
+	for (r = 0; r < NROWS; r++)
+	{
+		for (c = 0; c < NCOLS; c++)
+		{
 			game->board[r][c] = buf[NCOLS - c - 1][r];
 		}
 	}
@@ -206,7 +241,8 @@ void rotate_clockwise(struct game *game)
 void move_left(struct game *game)
 {
 	int r, ret = 0;
-	for (r = 0; r < NROWS; r++) {
+	for (r = 0; r < NROWS; r++)
+	{
 		tile *row = &game->board[r][0];
 		ret |= deflate_left(row);
 		ret |= combine_left(game, row);
@@ -261,7 +297,7 @@ void init_curses()
 	start_color();
 	cbreak(); // curses don't wait for enter key
 	noecho(); // curses don't echo the pressed key
-	keypad(stdscr,TRUE);
+	keypad(stdscr, TRUE);
 	clear(); // curses clear screen and send cursor to (0,0)
 	refresh();
 	curs_set(0);
@@ -279,7 +315,8 @@ void init_curses()
 int max_tile(const tile *lboard)
 {
 	int i, ret = 0;
-	for (i = 0; i < NROWS * NCOLS; i++) {
+	for (i = 0; i < NROWS * NCOLS; i++)
+	{
 		ret = max(ret, lboard[i]);
 	}
 	return ret;
@@ -288,7 +325,8 @@ int max_tile(const tile *lboard)
 FILE *fopen_or_die(const char *path, const char *mode)
 {
 	FILE *ret = fopen(path, mode);
-	if (!ret) {
+	if (!ret)
+	{
 		perror(path);
 		exit(EXIT_FAILURE);
 	}
@@ -297,11 +335,13 @@ FILE *fopen_or_die(const char *path, const char *mode)
 
 int get_input()
 {
-	if (playfile) {
+	if (playfile)
+	{
 		char *line = NULL;
 		size_t len = 0;
 		int ret = 'q';
-		if (getline(&line, &len, playfile) > 0) {
+		if (getline(&line, &len, playfile) > 0)
+		{
 			ret = line[strspn(line, " \t")];
 		}
 		free(line);
@@ -309,37 +349,104 @@ int get_input()
 			usleep(delay_ms * 1000);
 		return ret;
 	}
-	else {
+	else
+	{
 		return getch();
 	}
 }
 
 void record(char key, const struct game *game)
 {
-	if (recfile) {
+	if (recfile)
+	{
 		fprintf(recfile, "%c:%d\n", key, game->score);
 	}
 }
 
-int high_score = 0; //최고 기록을 저장하는 전역 변수
+int high_score = 0; // 최고 기록을 저장하는 전역 변수
 
-void load_high_score()
+const char *get_high_score_file_name(int game_mode)
 {
-	FILE *high_score_file = fopen("high_score.txt", "r"); //high_score.txt 파일을 읽기 모드로 열기
-	if (high_score_file)
+	switch (game_mode)
 	{
-		fscanf(high_score_file, "%d", &high_score); //파일에서 최고 기록 읽어오기
-		fclose(high_score_file); //파일 닫기
-	}	
+	case 2:
+		return "high_score_bomb.txt";
+	case 3:
+		return "high_score_chance.txt";
+	default:
+		return "high_score_default.txt";
+	}
 }
 
-void save_high_score(int score)
+void load_high_score(int game_mode)
 {
-	FILE *high_score_file = fopen("high_score.txt", "w"); //high_score.txt 파일을 쓰기 모드로 열기
+	const char *file_name = get_high_score_file_name(game_mode);
+	FILE *high_score_file = fopen(file_name, "r"); // 해당 파일을 읽기 모드로 열기
 	if (high_score_file)
 	{
-		fprintf(high_score_file, "%d", score); //파일에 최고 기록 쓰기
-		fclose(high_score_file); //파일 닫기
+		fscanf(high_score_file, "%d", &high_score); // 파일에서 최고 기록 읽어오기
+		fclose(high_score_file);										// 파일 닫기
+	}
+}
+
+void save_high_score(int game_mode, int score)
+{
+	const char *file_name = get_high_score_file_name(game_mode);
+	FILE *high_score_file = fopen(file_name, "w"); // 해당 파일을 쓰기 모드로 열기
+	if (high_score_file)
+	{
+		fprintf(high_score_file, "%d", score); // 파일에 최고 기록 쓰기
+		fclose(high_score_file);							 // 파일 닫기
+	}
+}
+
+void record_achievement(int score)
+{
+	const char *achievement_file = "achievements.txt";
+	FILE *record_achievement_file = fopen(achievement_file, "a");
+	if (!record_achievement_file)
+	{
+		perror("Failed to open achievement file");
+		return;
+	}
+
+	time_t t = time(NULL);
+	struct tm *tm_info = localtime(&t);
+	char date[20];
+	strftime(date, sizeof(date), "%Y.%m.%d", tm_info);
+
+	fprintf(record_achievement_file, "%d : %s\n", score, date); // 업적을 파일에 기록
+	fclose(record_achievement_file);
+}
+
+void check_and_record_achievements(int score)
+{
+	int milestones[] = {1000, 2048, 5000, 10000};
+	const int num_milestones = sizeof(milestones) / sizeof(milestones[0]);
+	char buffer[256];
+	FILE *record_achievement_file = fopen("achievements.txt", "r");
+	if (record_achievement_file)
+	{
+		while (fgets(buffer, sizeof(buffer), record_achievement_file))
+		{
+			int recorded_score;
+			sscanf(buffer, "%d", &recorded_score);
+			for (int i = 0; i < num_milestones; i++)
+			{
+				if (recorded_score == milestones[i])
+				{
+					milestones[i] = -1;
+				}
+			}
+		}
+		fclose(record_achievement_file);
+	}
+	for (int i = 0; i < num_milestones; i++)
+	{
+		if (milestones[i] != -1 && score >= milestones[i])
+		{
+			record_achievement(milestones[i]);
+		}
 	}
 }
 
@@ -352,10 +459,10 @@ int main(int argc, char **argv)
 	int opt;
 	int game_mode = 0;
 
-	load_high_score(); //게임 시작 시 최고 기록 불러오기
-
-	while ((opt = getopt(argc, argv, "hr:p:s:d:m:")) != -1) {
-		switch (opt) {
+	while ((opt = getopt(argc, argv, "hr:p:s:d:m:")) != -1)
+	{
+		switch (opt)
+		{
 		case 'm': // game mode
 			game_mode = atoi(optarg);
 			break;
@@ -381,24 +488,30 @@ int main(int argc, char **argv)
 	}
 
 	srandom(seed);
+	load_high_score(game_mode);
 
 	place_tile(&game, Number);
-	if (game_mode == 2) {  // Bomb mode
+	if (game_mode == 2)
+	{ // Bomb mode
 		place_tile(&game, Bomb);
 	}
 	place_tile(&game, Number);
 	batch_mode = recfile && playfile;
 
-	if (!batch_mode) {
+	if (!batch_mode)
+	{
 		init_curses();
 	}
 
-	while (1) {
-		if (!batch_mode) {
+	while (1)
+	{
+		if (!batch_mode)
+		{
 			print_game(&game);
 		}
 
-		if (lose_game(game)) {
+		if (lose_game(game))
+		{
 			exit_msg = "lost";
 			goto lose;
 		}
@@ -406,63 +519,84 @@ int main(int argc, char **argv)
 		last_turn = game.turns;
 
 		int key = get_input();
-		switch (key) {
-		case KEY_LEFT: move_left(&game); break;
-		case KEY_DOWN: move_down(&game); break;
-		case KEY_UP: move_up(&game); break;
-		case KEY_RIGHT: move_right(&game); break;
+		switch (key)
+		{
+		case 'a':
+		case KEY_LEFT:
+			move_left(&game);
+			break;
+		case 's':
+		case KEY_DOWN:
+			move_down(&game);
+			break;
+		case 'w':
+		case KEY_UP:
+			move_up(&game);
+			break;
+		case 'd':
+		case KEY_RIGHT:
+			move_right(&game);
+			break;
 		case 'q':
 			exit_msg = "quit";
 			goto end;
 		}
 
-		if (last_turn != game.turns) {
-			if (game_mode == 3) {  // Chance mode
+		if (last_turn != game.turns)
+		{
+			if (game_mode == 3)
+			{ // Chance mode
 				place_tile(&game, Chance);
-			} else {
+			}
+			else
+			{
 				place_tile(&game, Number);
 			}
 			record(key, &game);
 
-			if (game.score > high_score) //최고 기록을 갱신했다면?
+			if (game.score > high_score) // 최고 기록을 갱신했다면?
 			{
-				high_score = game.score; //최고 기록 갱신
-				save_high_score(high_score); //해당 기록 파일에 저장
+				high_score = game.score;								// 최고 기록 갱신
+				save_high_score(game_mode, high_score); // 해당 기록 파일에 저장
 				if (!batch_mode)
 				{
-					move(8,0);
-					printw("New high score: %d\n", high_score); //새로운 최고 기록 유저에게 알려주기
+					move(8, 0);
+					printw("New high score: %d\n", high_score); // 새로운 최고 기록 유저에게 알려주기
 				}
 			}
 		}
 	}
 
 lose:
-	if (batch_mode) {
+	if (batch_mode)
+	{
 		return 0;
 	}
 
 	move(7, 0);
 	printw("You lose! Press q to quit.");
-	while (getch() != 'q');
+	while (getch() != 'q')
+		;
 end:
-	if (batch_mode) {
+	if (batch_mode)
+	{
 		return 0;
 	}
 
 	endwin();
 	printf("You %s after scoring %d points in %d turns, "
-		"with largest tile %d\n",
-		exit_msg, game.score, game.turns,
-		1 << max_tile((tile *)game.board));
+				 "with largest tile %d\n",
+				 exit_msg, game.score, game.turns,
+				 1 << max_tile((tile *)game.board));
 
-	if (game.score > high_score) //게임 종료 시 최고 기록을 갱신했다면?
+	if (game.score > high_score) // 게임 종료 시 최고 기록을 갱신했다면?
 	{
-		printf("Congratulations! New high score: %d\n", game.score); //게임 종료 시 새로운 최고 기록 알림
-	} else {
-		printf("High score: %d\n", high_score); //최고 기록 출력
+		printf("Congratulations! New high score: %d\n", game.score); // 게임 종료 시 새로운 최고 기록 알림
+	}
+	else
+	{
+		printf("High score: %d\n", high_score); // 최고 기록 출력
 	}
 
 	return 0;
 }
-
