@@ -13,7 +13,7 @@
 #include <curses.h>
 #include <string.h>
 #include <time.h>
-#include <assert.hu>
+#include <assert.h>
 #include <unistd.h>
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -45,12 +45,15 @@ struct game {
 typedef enum {
     Number,
     Bomb,
-	Chance
+    Chance
 } TileType;
 
 static FILE *recfile = NULL, *playfile = NULL;
 static int batch_mode;
 static int delay_ms = 250;
+
+static struct timespec start_time; //시작 시간 저장 변수
+static double elapsed_time = 0; //경과 시간 저장 변수
 
 // place_tile() returns 0 if it did place a tile and -1 if there is no open
 // space.
@@ -134,6 +137,14 @@ void print_game(const struct game *game)
 	int r, c;
 	move(0, 0);
 	printw("Score: %6d  Turns: %4d", game->score, game->turns);
+
+	struct timespec current_time;
+        clock_gettime(CLOCK_MONOTONIC, &current_time); //현재 시간 얻어오기
+        elapsed_time = (current_time.tv_sec - start_time.tv_sec) +
+                              (current_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
+        //현재 시간과 시작 시간을 비교해서 경과된 시간 계산
+        mvprintw(1,0,"Time: %.2f seconds", elapsed_time); //curse 라이브러리에 있는 print함수.. 그냥 printf쓰면 출력 위치 오류로 엄청난 오>
+
 	for (r = 0; r < NROWS; r++) {
 		for (c = 0; c < NCOLS; c++) {
 			move(r + 2, 5 * c);
@@ -262,8 +273,7 @@ void init_curses()
 	cbreak(); // curses don't wait for enter key
 	noecho(); // curses don't echo the pressed key
 	keypad(stdscr,TRUE);
-	clear(); // curses clear screen and send cursor to (0,0)
-	refresh();
+	timeout(0);
 	curs_set(0);
 
 	bg = use_default_colors() == OK ? -1 : 0;
@@ -382,6 +392,8 @@ int main(int argc, char **argv)
 
 	srandom(seed);
 
+	clock_gettime(CLOCK_MONOTONIC, &start_time); //게임이 시작하면 현재 시간을 얻어와서 저장.
+
 	place_tile(&game, Number);
 	if (game_mode == 2) {  // Bomb mode
 		place_tile(&game, Bomb);
@@ -462,6 +474,8 @@ end:
 	} else {
 		printf("High score: %d\n", high_score); //최고 기록 출력
 	}
+
+	printf("Time played: %.2f seconds\n", elapsed_time); //진행 시간 출력
 
 	return 0;
 }
