@@ -1,13 +1,3 @@
-/* Clone of thel2048 sliding tile puzzle game. (C) Wes Waugh 2014
- *
- * This program only works on Unix-like systems with curses. Link against
- * the curses library. You can pass the -lcurses flag to gcc at compile
- * time.
- *
- * This program is free software, licensed under the GPLv3. Check the
- * LICENSE file for details.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <curses.h>
@@ -53,6 +43,9 @@ typedef enum
 static FILE *recfile = NULL, *playfile = NULL;
 static int batch_mode;
 static int delay_ms = 250;
+
+static struct timespec start_time; //시작 시간 저장 변수
+static double elapsed_time = 0; //경과 시간 저장 변수
 
 // place_tile() returns 0 if it did place a tile and -1 if there is no open
 // space.
@@ -153,16 +146,21 @@ void print_game(const struct game *game)
 	int r, c;
 	move(0, 0);
 	printw("Score: %6d  Turns: %4d", game->score, game->turns);
-	for (r = 0; r < NROWS; r++)
-	{
-		for (c = 0; c < NCOLS; c++)
-		{
+
+	struct timespec current_time;
+        clock_gettime(CLOCK_MONOTONIC, &current_time); //현재 시간 얻어오기
+        elapsed_time = (current_time.tv_sec - start_time.tv_sec) +
+                              (current_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
+        //현재 시간과 시작 시간을 비교해서 경과된 시간 계산
+        mvprintw(1,0,"Time: %.2f seconds", elapsed_time); //curse 라이브러리에 있는 print함수.. 그냥 printf쓰면 출력 위치 오류로 엄청난 오>
+
+	for (r = 0; r < NROWS; r++) {
+		for (c = 0; c < NCOLS; c++) {
 			move(r + 2, 5 * c);
 			print_tile(game->board[r][c]);
 		}
 	}
-
-	refresh();
+  refresh();
 }
 
 int combine_left(struct game *game, tile row[NCOLS])
@@ -254,40 +252,40 @@ void move_left(struct game *game)
 
 void move_right(struct game *game)
 {
-	rotate_clockwise(game);
-	rotate_clockwise(game);
-	move_left(game);
-	rotate_clockwise(game);
-	rotate_clockwise(game);
+        rotate_clockwise(game);
+        rotate_clockwise(game);
+        move_left(game);
+        rotate_clockwise(game);
+        rotate_clockwise(game);
 }
 
 void move_up(struct game *game)
 {
-	rotate_clockwise(game);
-	rotate_clockwise(game);
-	rotate_clockwise(game);
-	move_left(game);
-	rotate_clockwise(game);
+        rotate_clockwise(game);
+        rotate_clockwise(game);
+        rotate_clockwise(game);
+        move_left(game);
+        rotate_clockwise(game);
 }
 
 void move_down(struct game *game)
 {
-	rotate_clockwise(game);
-	move_left(game);
-	rotate_clockwise(game);
-	rotate_clockwise(game);
-	rotate_clockwise(game);
+        rotate_clockwise(game);
+        move_left(game);
+        rotate_clockwise(game);
+        rotate_clockwise(game);
+        rotate_clockwise(game);
 }
 
 // Pass by value because this function mutates the game
 int lose_game(struct game test_game)
 {
-	int start_turns = test_game.turns;
-	move_left(&test_game);
-	move_up(&test_game);
-	move_down(&test_game);
-	move_right(&test_game);
-	return test_game.turns == start_turns;
+        int start_turns = test_game.turns;
+        move_left(&test_game);
+        move_up(&test_game);
+        move_down(&test_game);
+        move_right(&test_game);
+        return test_game.turns == start_turns;
 }
 
 void init_curses()
@@ -452,9 +450,10 @@ void check_and_record_achievements(int score)
 
 int main(int argc, char **argv)
 {
-	const char *exit_msg = "";
-	struct game game = {0};
+  const char *exit_msg = "";
+  struct game game = {0};
 	int last_turn = game.turns;
+
 	time_t seed = time(NULL);
 	int opt;
 	int game_mode = 0;
@@ -489,6 +488,7 @@ int main(int argc, char **argv)
 
 	srandom(seed);
 	load_high_score(game_mode);
+  clock_gettime(CLOCK_MONOTONIC, &start_time); //게임이 시작하면 현재 시간을 얻어와서 저장.
 
 	place_tile(&game, Number);
 	if (game_mode == 2)
@@ -510,11 +510,16 @@ int main(int argc, char **argv)
 			print_game(&game);
 		}
 
-		if (lose_game(game))
-		{
-			exit_msg = "lost";
-			goto lose;
-		}
+		if (lose_game(game)) 
+    {
+      // Stop the timer when the game is lost
+      struct timespec end_time;
+      clock_gettime(CLOCK_MONOTONIC, &end_time);
+      elapsed_time = (end_time.tv_sec - start_time.tv_sec) +
+                     (end_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
+      exit_msg = "lost";
+      goto lose;
+    }
 
 		last_turn = game.turns;
 
@@ -597,6 +602,6 @@ end:
 	{
 		printf("High score: %d\n", high_score); // 최고 기록 출력
 	}
-
+  printf("Time played: %.2f seconds\n", elapsed_time); //진행 시간 출력
 	return 0;
 }
