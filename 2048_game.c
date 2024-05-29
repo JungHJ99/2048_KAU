@@ -347,8 +347,7 @@ void init_curses()
 	cbreak(); // curses don't wait for enter key
 	noecho(); // curses don't echo the pressed key
 	keypad(stdscr, TRUE);
-	clear(); // curses clear screen and send cursor to (0,0)
-	refresh();
+	timeout(100);
 	curs_set(0);
 
 	bg = use_default_colors() == OK ? -1 : 0;
