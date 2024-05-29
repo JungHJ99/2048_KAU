@@ -546,6 +546,25 @@ int main(int argc, char **argv)
 			case 'q':
 				exit_msg = "quit";
 				goto end;
+			case 'r': // 게임 재시작
+				// 게임 초기화
+				game.turns = 0;
+				game.score = 0;
+				memset(game.board, 0, sizeof(game.board));
+				// 새로운 타일 생성
+				place_tile(&game, Number);
+				if(game_mode == 2) {
+					place_tile(&game, Bomb);
+				}
+				place_tile(&game, Number);
+				// 시간 초기화
+				clock_gettime(CLOCK_MONOTONIC, &start_time);
+				// if (!batch_mode)
+				// {
+				// 	init_curses();
+				// 	clear(); // 화면을 지움.
+				// }
+				break;
 		}
 
 		if (last_turn != game.turns)
