@@ -40,7 +40,7 @@ typedef enum
 	Chance
 } TileType;
 
-static FILE *recfile = NULL, *playfile = NULL;
+static FILE *recfile = NULL, *playfile = NULL, *loadfile = NULL;
 static int batch_mode;
 static int delay_ms = 250;
 
@@ -449,6 +449,49 @@ void save_high_score(int game_mode, int score)
 	}
 }
 
+// 게임 상태 저장 함수
+void save_game(struct game *game, const char *filename)
+{
+	FILE *fp = fopen(filename, "w");
+	if (fp == NULL)
+	{
+		perror("Error opening file");
+		return;
+	}
+	fprintf(fp, "%d %d\n", game->turns, game->score);
+	for (int r = 0; r < NROWS; r++)
+	{
+		for (int c = 0; c < NCOLS; c++)
+		{
+			fprintf(fp, "%d ", game->board[r][c]);
+		}
+		fprintf(fp, "\n");
+	}
+
+	fclose(fp);
+}
+
+// 게임 상태 불러오기 함수
+void load_game(struct game *game, const char *filename)
+{
+	FILE *fp = fopen(filename, "r");
+	if (fp == NULL)
+	{
+		perror("Error opening file");
+		return;
+	}
+	fscanf(fp, "%d %d\n", &game->turns, &game->score);
+	for (int r = 0; r < NROWS; r++)
+	{
+		for (int c = 0; c < NCOLS; c++)
+		{
+			fscanf(fp, "%d ", &game->board[r][c]);
+		}
+	}
+	
+	fclose(fp);
+}
+
 int main(int argc, char **argv)
 {
   const char *exit_msg = "";
@@ -459,7 +502,7 @@ int main(int argc, char **argv)
 	int opt;
 	int game_mode = 0;
 
-	while ((opt = getopt(argc, argv, "hr:p:s:d:m:")) != -1)
+	while ((opt = getopt(argc, argv, "hr:p:s:d:m:l:")) != -1)
 	{
 		switch (opt)
 		{
@@ -481,6 +524,9 @@ int main(int argc, char **argv)
 		case 'h':
 			printf(usage, argv[0]);
 			exit(EXIT_SUCCESS);
+		case 'l':
+			loadfile = fopen_or_die(optarg, "r"); // loadfile 변수에 파일 정보 저장
+			break;
 		default:
 			fprintf(stderr, usage, argv[0]);
 			exit(EXIT_FAILURE);
@@ -489,6 +535,18 @@ int main(int argc, char **argv)
 
 	srandom(seed);
 	load_high_score(game_mode);
+
+	if (loadfile) { // loadfile 변수가 NULL이 아닌 경우
+		load_game(&game, optarg); // 게임 상태 불러오기
+	} else {
+		place_tile(&game, Number);
+		if (game_mode == 2) // 폭탄 모드
+		{
+			place_tile(&game, Bomb);
+		}
+		place_tile(&game, Number);
+	}
+
   	clock_gettime(CLOCK_MONOTONIC, &start_time); // 게임이 시작하면 현재 시간을 얻어와서 저장.
 
 	place_tile(&game, Number);
@@ -527,6 +585,7 @@ int main(int argc, char **argv)
 		int key = get_input();
 		switch (key)
 		{
+			char file_name[256];
 			case 'a':
 			case KEY_LEFT:
 				move_left(&game);
@@ -559,11 +618,20 @@ int main(int argc, char **argv)
 				place_tile(&game, Number);
 				// 시간 초기화
 				clock_gettime(CLOCK_MONOTONIC, &start_time);
-				// if (!batch_mode)
-				// {
-				// 	init_curses();
-				// 	clear(); // 화면을 지움.
-				// }
+				break;
+			case 'l': // 게임 저장
+				if (!batch_mode)
+				{
+					move(8, 0);
+					printw("Enter file name: ");
+					echo();
+					getstr(file_name);
+					noecho();
+					save_game(&game, file_name); // 게임 상태 저장
+					move(8, 0);
+					printw("                                 "); // 파일 이름 입력창 지우기
+					refresh();
+				}
 				break;
 		}
 
