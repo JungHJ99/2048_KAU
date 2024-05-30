@@ -236,9 +236,15 @@ int combine_left(struct game *game, tile row[NCOLS])
 				game->score += (1 << row[c - 1]); // 점수 계산 (2^(row[c-1]))
 				did_combine = 1;
 				mvprintw(11, 0, "Combined %d and %d to %d, score: %d\n", 
+<<<<<<< HEAD
 					(1 << (row[c - 1] - 1)), 
 					(1 << (row[c - 1] - 1)),
 					(1 << row[c - 1]), // 결과 값들이 지수로 표현되는 문제 해결
+=======
+					(1 << (row[c - 1] - 1)), // 합쳐진 타일의 2의 제곱수
+					(1 << (row[c - 1] - 1)),
+					(1 << row[c - 1]), // 결과 값의 2의 제곱수
+>>>>>>> f39431c5b794e931e9fd10c1adb606fbe2741acf
 					game->score);
 			}
 			else if (row[c - 1] == 16 || row[c] == 16) // 찬스 타일과 숫자 타일이 만나면 무조건 합쳐짐
