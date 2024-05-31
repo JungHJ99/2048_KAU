@@ -32,6 +32,14 @@ struct game
 	tile board[NROWS][NCOLS];
 };
 
+// 게임 정보를 저장할 구조체
+struct game_record {
+        int score;
+        int turns;
+        double elapsed_time;
+        int mode;
+};
+
 // 새로운 모드를 위한 타일 목록
 typedef enum
 {
@@ -47,6 +55,46 @@ static int delay_ms = 250;
 static struct timespec start_time; //시작 시간 저장 변수
 static double elapsed_time = 0; //경과 시간 저장 변수
 
+//기록된 게임 정보를 저장할 파일 이름
+const char *GAME_RECORDS_FILE = "game_records.txt";
+
+const char* get_mode_string(int mode) {
+    switch (mode) {
+        case 1: return "Normal";
+        case 2: return "Bomb";
+        case 3: return "Chance";
+        default: return "Normal";
+    }
+}
+
+// 게임 정보를 파일에 기록하는 함수
+void record_game_info(struct game_record game_info) {
+    FILE *record_file = fopen(GAME_RECORDS_FILE, "a"); // 기록 파일을 엽니다. 쓰기 모드로 엽니다.
+    if (record_file != NULL) {
+        // 게임 정보를 파일에 기록합니다.
+        fprintf(record_file, "Mode: %s, Score: %d, Turns: %d, Time: %.2f seconds\n",
+                get_mode_string(game_info.mode),game_info.score, game_info.turns, game_info.elapsed_time);
+        fclose(record_file); // 파일을 닫습니다.
+    } else {
+        perror("Failed to open game records file");
+    }
+}
+
+// 저장된 모든 게임 기록을 파일에서 읽어와서 출력하는 함수
+void show_all_game_records() {
+    FILE *record_file = fopen(GAME_RECORDS_FILE, "r"); // 기록 파일을 엽니다. 읽기 모드로 엽니다.
+    if (record_file != NULL) {
+        printf("All Game Records:\n");
+        char buffer[256]; // 한 줄씩 읽어올 버퍼
+        // 파일에서 한 줄씩 읽어와서 출력합니다.
+        while (fgets(buffer, sizeof(buffer), record_file) != NULL) {
+            printf("%s", buffer);
+        }
+        fclose(record_file); // 파일을 닫습니다.
+    } else {
+        perror("Failed to open game records file");
+    }
+}
 
 void record_achievement(int score)
 {
@@ -151,7 +199,7 @@ int place_tile(struct game *game, TileType tile_type)
 			switch (tile_type)
 			{
 			case Number:
-				lboard[i] = random() % 10 ? 1 : 2;
+				lboard[i] = 1;
 				return 0;
 			case Bomb:
 				lboard[i] = 15; // 폭탄 타일 (타일 넘버 15)
@@ -522,19 +570,23 @@ int main(int argc, char **argv)
 {
   const char *exit_msg = "";
   struct game game = {0};
+  struct game_record current_game_info;
 	int last_turn = game.turns;
 
 	time_t seed = time(NULL);
 	int opt;
 	int game_mode = 0;
 
-	while ((opt = getopt(argc, argv, "hr:p:s:d:m:l:")) != -1)
+	while ((opt = getopt(argc, argv, "hr:p:s:d:m:l:f")) != -1)
 	{
 		switch (opt)
 		{
 		case 'm': // 게임 모드를 args로 받아와서 설정
 			game_mode = atoi(optarg);
 			break;
+		case 'f':
+			show_all_game_records();
+			return 0;
 		case 'r':
 			recfile = fopen_or_die(optarg, "w");
 			break;
@@ -694,6 +746,14 @@ int main(int argc, char **argv)
 	}
 
 	lose:
+		 // 게임이 종료되면 해당 게임의 정보를 구성합니다.
+                current_game_info.score = game.score;
+                current_game_info.turns = game.turns;
+                current_game_info.elapsed_time = elapsed_time;
+                current_game_info.mode = game_mode;
+                // 해당 게임의 정보를 파일에 기록합니다.
+                record_game_info(current_game_info);
+
 		if (batch_mode)
 		{
 			return 0;
