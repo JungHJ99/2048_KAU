@@ -627,12 +627,6 @@ int main(int argc, char **argv)
 
   	clock_gettime(CLOCK_MONOTONIC, &start_time); // 게임이 시작하면 현재 시간을 얻어와서 저장.
 
-	place_tile(&game, Number);
-	if (game_mode == 2) // 폭탄 모드
-	{
-		place_tile(&game, Bomb);
-	}
-	place_tile(&game, Number);
 	batch_mode = recfile && playfile;
 
 	if (!batch_mode)
