@@ -199,7 +199,7 @@ int place_tile(struct game *game, TileType tile_type)
 			switch (tile_type)
 			{
 			case Number:
-				lboard[i] = random() % 10 ? 1 : 2;
+				lboard[i] = 1;
 				return 0;
 			case Bomb:
 				lboard[i] = 15; // 폭탄 타일 (타일 넘버 15)
