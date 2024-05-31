@@ -98,6 +98,29 @@ void check_and_record_achievements(int score)
 	}
 }
 
+struct game prev_game; //이전 상태를 저장하기 위한 구조체
+int can_undo = 0; // undo 가능 여부를 나타내는 플래그
+
+void copy_game_state(struct game *dest, const struct game *src)
+{
+        memcpy(dest, src, sizeof(struct game));
+}
+
+void save_game_state(struct game *game)
+{
+        copy_game_state(&prev_game, game);
+        can_undo = 1;
+}
+
+void undo_game_state(struct game *game)
+{
+        if (can_undo)
+        {
+                copy_game_state(game, &prev_game);
+                can_undo = 0;
+        }
+}
+
 // place_tile() returns 0 if it did place a tile and -1 if there is no open
 // space.
 int place_tile(struct game *game, TileType tile_type)
@@ -591,23 +614,30 @@ int main(int argc, char **argv)
 			char file_name[256];
 			case 'a':
 			case KEY_LEFT:
+				save_game_state(&game);
 				move_left(&game);
 				break;
 			case 's':
 			case KEY_DOWN:
+				save_game_state(&game);
 				move_down(&game);
 				break;
 			case 'w':
 			case KEY_UP:
+				save_game_state(&game);
 				move_up(&game);
 				break;
 			case 'd':
 			case KEY_RIGHT:
+				save_game_state(&game);
 				move_right(&game);
 				break;
 			case 'q':
 				exit_msg = "quit";
 				goto end;
+			case 'u': //이전 상태로 가기
+				undo_game_state(&game);
+                                break;
 			case 'r': // 게임 재시작
 				// 게임 초기화
 				game.turns = 0;
@@ -638,7 +668,7 @@ int main(int argc, char **argv)
 				break;
 		}
 
-		if (last_turn != game.turns)
+		if (key != 'u' && last_turn != game.turns) // 이전상태로 갈 때는 새 타일 생성 안되게 하기
 		{
 			if (game_mode == 3) // 찬스 모드
 			{
