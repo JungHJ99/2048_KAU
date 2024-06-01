@@ -763,7 +763,7 @@ int main(int argc, char **argv)
 
 		if (game_mode == 5) // 2000점 빨리 얻는 모드
 		{
-			if (game.score >= 200)
+			if (game.score >= 2000)
 			{
 				mvprintw(9, 0, "You reached 2000 points in %.2f seconds\nPress q to quit.", elapsed_time);
 				while (getch() != 'q');	
