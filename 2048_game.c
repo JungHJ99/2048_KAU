@@ -208,26 +208,26 @@ int place_tile(struct game *game, TileType tile_type)
 		{
 			switch (tile_type)
 			{
-				case Number:
+			case Number:
+				lboard[i] = 1;
+				return 0;
+			case Bomb:
+				lboard[i] = 15; // 폭탄 타일 (타일 넘버 15)
+				return 0;
+			case Chance:
+				if (random() % 10 < 1)
+				{
+					lboard[i] = 2;
+				}
+				else if (random() % 10 == 9) // 찬스 등장 확률: 1/10
+				{
+					lboard[i] = 16; // 찬스 타일 (타일 넘버 16)
+				}
+				else
+				{
 					lboard[i] = 1;
-					return 0;
-				case Bomb:
-					lboard[i] = 15; // 폭탄 타일 (타일 넘버 15)
-					return 0;
-				case Chance:
-					if (random() % 10 < 1)
-					{
-						lboard[i] = 2;
-					}
-					else if (random() % 10 == 9) // 찬스 등장 확률: 1/10
-					{
-						lboard[i] = 16; // 찬스 타일 (타일 넘버 16)
-					}
-					else
-					{
-						lboard[i] = 1;
-					}
-					return 0;
+				}
+				return 0;
 			}
 		}
 	}
@@ -288,8 +288,10 @@ void print_game(const struct game *game)
 
 	mvprintw(1,0,"Time: %.2f seconds", elapsed_time); // curse 라이브러리에 있는 print함수
 
-	for (r = 0; r < NROWS; r++) {
-		for (c = 0; c < NCOLS; c++) {
+	for (r = 0; r < NROWS; r++) 
+	{
+		for (c = 0; c < NCOLS; c++) 
+		{
 			move(r + 2, 5 * c);
 			print_tile(game->board[r][c]);
 		}
@@ -505,6 +507,8 @@ const char *get_high_score_file_name(int game_mode)
 	case 2:
 		return "high_score_bomb.txt";
 	case 3:
+		return "high_score_chance.txt";
+	case 4:
 		return "high_score_chance.txt";
 	default:
 		return "high_score_default.txt";
