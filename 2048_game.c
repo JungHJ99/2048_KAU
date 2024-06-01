@@ -71,7 +71,7 @@ int place_tile(struct game *game)
 	assert(0);
 }
 
-void print_tile(int tile)
+/*void print_tile(int tile)
 {
 	if (tile) {
 		if (tile < 6)
@@ -85,19 +85,17 @@ void print_tile(int tile)
 	else {
 		printw("   .");
 	}
-<<<<<<< Updated upstream
-=======
 }*/
 
 void print_tileGUI(int row, int col, int tile)
 {
     int start_row = row * 3 + 2;
     int start_col = col * 5;
-    int pair = 1; 
+    int pair = 1;
 
     if (tile) {
         attron(A_BOLD);
-        pair = 6 + ((tile - 1) % 6) + 1;
+        pair = 6 + ((tile - 1) % 6) + 1; 
         attron(COLOR_PAIR(pair));
         mvprintw(start_row, start_col, "+----+");
         mvprintw(start_row + 1, start_col, "|%4d|", 1 << tile);
@@ -109,24 +107,12 @@ void print_tileGUI(int row, int col, int tile)
         mvprintw(start_row + 1, start_col, "|    |");
         mvprintw(start_row + 2, start_col, "+----+");
     }
->>>>>>> Stashed changes
 }
 
 void print_game(const struct game *game)
 {
-<<<<<<< Updated upstream
-	int r, c;
-	move(0, 0);
-	printw("Score: %6d  Turns: %4d", game->score, game->turns);
-	for (r = 0; r < NROWS; r++) {
-		for (c = 0; c < NCOLS; c++) {
-			move(r + 2, 5 * c);
-			print_tile(game->board[r][c]);
-		}
-	}
-=======
     attron(A_BOLD);
-    attron(COLOR_PAIR(9));
+    attron(COLOR_PAIR(9)); 
     move(0, 0);
     printw("Score: %6d  Turns: %4d", game->score, game->turns);
     attroff(COLOR_PAIR(9));
@@ -137,10 +123,11 @@ void print_game(const struct game *game)
             print_tileGUI(r, c, game->board[r][c]);
         }
     }
->>>>>>> Stashed changes
 
-	refresh();
+    refresh();
 }
+
+
 
 int combine_left(struct game *game, tile row[NCOLS])
 {
@@ -190,16 +177,18 @@ void rotate_clockwise(struct game *game)
 
 void move_left(struct game *game)
 {
-	int r, ret = 0;
-	for (r = 0; r < NROWS; r++) {
-		tile *row = &game->board[r][0];
-		ret |= deflate_left(row);
-		ret |= combine_left(game, row);
-		ret |= deflate_left(row);
-	}
+    int r, ret = 0;
+    for (r = 0; r < NROWS; r++) {
+        tile *row = &game->board[r][0];
+        ret |= deflate_left(row);
+        ret |= combine_left(game, row);
+        ret |= deflate_left(row);
+    }
 
-	game->turns += ret;
+    game->turns += ret;
 }
+
+
 
 void move_right(struct game *game)
 {
@@ -267,6 +256,7 @@ void init_curses()
     init_pair(11, COLOR_WHITE, COLOR_MAGENTA);
     init_pair(12, COLOR_WHITE, COLOR_CYAN);
 }
+
 
 int max_tile(const tile *lboard)
 {
