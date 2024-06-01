@@ -85,10 +85,36 @@ void print_tile(int tile)
 	else {
 		printw("   .");
 	}
+<<<<<<< Updated upstream
+=======
+}*/
+
+void print_tileGUI(int row, int col, int tile)
+{
+    int start_row = row * 3 + 2;
+    int start_col = col * 5;
+    int pair = 1; 
+
+    if (tile) {
+        attron(A_BOLD);
+        pair = 6 + ((tile - 1) % 6) + 1;
+        attron(COLOR_PAIR(pair));
+        mvprintw(start_row, start_col, "+----+");
+        mvprintw(start_row + 1, start_col, "|%4d|", 1 << tile);
+        mvprintw(start_row + 2, start_col, "+----+");
+        attroff(COLOR_PAIR(pair));
+        attroff(A_BOLD);
+    } else {
+        mvprintw(start_row, start_col, "+----+");
+        mvprintw(start_row + 1, start_col, "|    |");
+        mvprintw(start_row + 2, start_col, "+----+");
+    }
+>>>>>>> Stashed changes
 }
 
 void print_game(const struct game *game)
 {
+<<<<<<< Updated upstream
 	int r, c;
 	move(0, 0);
 	printw("Score: %6d  Turns: %4d", game->score, game->turns);
@@ -98,6 +124,20 @@ void print_game(const struct game *game)
 			print_tile(game->board[r][c]);
 		}
 	}
+=======
+    attron(A_BOLD);
+    attron(COLOR_PAIR(9));
+    move(0, 0);
+    printw("Score: %6d  Turns: %4d", game->score, game->turns);
+    attroff(COLOR_PAIR(9));
+    attroff(A_BOLD);
+
+    for (int r = 0; r < NROWS; r++) {
+        for (int c = 0; c < NCOLS; c++) {
+            print_tileGUI(r, c, game->board[r][c]);
+        }
+    }
+>>>>>>> Stashed changes
 
 	refresh();
 }
@@ -201,23 +241,31 @@ int lose_game(struct game test_game)
 
 void init_curses()
 {
-	int bg = 0;
-	initscr(); // curses init
-	start_color();
-	cbreak(); // curses don't wait for enter key
-	noecho(); // curses don't echo the pressed key
-	keypad(stdscr,TRUE);
-	clear(); // curses clear screen and send cursor to (0,0)
-	refresh();
-	curs_set(0);
+    int bg = 0;
+    initscr();
+    start_color();
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+    clear();
+    refresh();
+    curs_set(0);
 
-	bg = use_default_colors() == OK ? -1 : 0;
-	init_pair(1, COLOR_RED, bg);
-	init_pair(2, COLOR_GREEN, bg);
-	init_pair(3, COLOR_YELLOW, bg);
-	init_pair(4, COLOR_BLUE, bg);
-	init_pair(5, COLOR_MAGENTA, bg);
-	init_pair(6, COLOR_CYAN, bg);
+    bg = use_default_colors() == OK ? -1 : 0;
+
+    init_pair(1, COLOR_RED, bg);
+    init_pair(2, COLOR_GREEN, bg);
+    init_pair(3, COLOR_YELLOW, bg);
+    init_pair(4, COLOR_BLUE, bg);
+    init_pair(5, COLOR_MAGENTA, bg);
+    init_pair(6, COLOR_CYAN, bg);
+
+    init_pair(7, COLOR_WHITE, COLOR_RED);
+    init_pair(8, COLOR_WHITE, COLOR_GREEN);
+    init_pair(9, COLOR_WHITE, COLOR_YELLOW);
+    init_pair(10, COLOR_WHITE, COLOR_BLUE);
+    init_pair(11, COLOR_WHITE, COLOR_MAGENTA);
+    init_pair(12, COLOR_WHITE, COLOR_CYAN);
 }
 
 int max_tile(const tile *lboard)
