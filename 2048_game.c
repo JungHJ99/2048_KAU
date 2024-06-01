@@ -747,6 +747,15 @@ int main(int argc, char **argv)
 				}
 			}
 		}
+
+		if (game_mode == 4) // 타임어택 모드
+		{
+			if (elapsed_time >= 120.00) // 120초가 되면 게임 종료
+			{
+				exit_msg = "Time over";
+				goto end;
+			}
+		}
 	}
 
 	lose:
