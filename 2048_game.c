@@ -59,7 +59,8 @@ static double elapsed_time = 0; //경과 시간 저장 변수
 const char *GAME_RECORDS_FILE = "game_records.txt";
 
 const char* get_mode_string(int mode) {
-    switch (mode) {
+    switch (mode) 
+	{
         case 1: return "Normal";
         case 2: return "Bomb";
         case 3: return "Chance";
@@ -69,33 +70,42 @@ const char* get_mode_string(int mode) {
 
 // 게임 정보를 파일에 기록하는 함수
 void record_game_info(struct game_record game_info) {
-    FILE *record_file = fopen(GAME_RECORDS_FILE, "a"); // 기록 파일을 엽니다. 쓰기 모드로 엽니다.
-    if (record_file != NULL) {
-        // 게임 정보를 파일에 기록합니다.
+    FILE *record_file = fopen(GAME_RECORDS_FILE, "a"); // 기록 파일을 쓰기 모드로 열기
+    if (record_file != NULL) 
+	{
+        // 게임 정보를 파일에 기록
         fprintf(record_file, "Mode: %s, Score: %d, Turns: %d, Time: %.2f seconds\n",
                 get_mode_string(game_info.mode),game_info.score, game_info.turns, game_info.elapsed_time);
-        fclose(record_file); // 파일을 닫습니다.
-    } else {
+        fclose(record_file); // 파일 닫기
+    } 
+	else 
+	{
         perror("Failed to open game records file");
     }
 }
 
 // 저장된 모든 게임 기록을 파일에서 읽어와서 출력하는 함수
 void show_all_game_records() {
-    FILE *record_file = fopen(GAME_RECORDS_FILE, "r"); // 기록 파일을 엽니다. 읽기 모드로 엽니다.
-    if (record_file != NULL) {
+    FILE *record_file = fopen(GAME_RECORDS_FILE, "r"); // 기록 파일을 읽기 모드로 열기
+    if (record_file != NULL) 
+	{
         printf("All Game Records:\n");
         char buffer[256]; // 한 줄씩 읽어올 버퍼
-        // 파일에서 한 줄씩 읽어와서 출력합니다.
-        while (fgets(buffer, sizeof(buffer), record_file) != NULL) {
+
+        // 파일에서 한 줄씩 읽어와서 출력
+        while (fgets(buffer, sizeof(buffer), record_file) != NULL) 
+		{
             printf("%s", buffer);
         }
-        fclose(record_file); // 파일을 닫습니다.
-    } else {
+        fclose(record_file); // 파일 닫기
+    } 
+	else 
+	{
         perror("Failed to open game records file");
     }
 }
 
+// 업적을 파일에 기록하는 함수
 void record_achievement(int score)
 {
 	const char *achievement_file = "achievements.txt";
@@ -106,6 +116,7 @@ void record_achievement(int score)
 		return;
 	}
 
+	// 날짜 가져오기
 	time_t t = time(NULL);
 	struct tm *tm_info = localtime(&t);
 	char date[20];
@@ -115,18 +126,19 @@ void record_achievement(int score)
 	fclose(record_achievement_file);
 }
 
+// 업적을 확인하고 기록하는 함수
 void check_and_record_achievements(int score)
 {
 	int milestones[] = {1000, 2048, 5000, 10000};
 	const int num_milestones = sizeof(milestones) / sizeof(milestones[0]);
 	char buffer[256];
-	FILE *record_achievement_file = fopen("achievements.txt", "r");
+	FILE *record_achievement_file = fopen("achievements.txt", "r"); // 업적 파일을 읽기 모드로 열기
 	if (record_achievement_file)
 	{
 		while (fgets(buffer, sizeof(buffer), record_achievement_file))
 		{
 			int recorded_score;
-			sscanf(buffer, "%d", &recorded_score);
+			sscanf(buffer, "%d", &recorded_score); // 읽어온 줄에서 점수를 추출
 			for (int i = 0; i < num_milestones; i++)
 			{
 				if (recorded_score == milestones[i])
@@ -146,38 +158,35 @@ void check_and_record_achievements(int score)
 	}
 }
 
-struct game prev_game; //이전 상태를 저장하기 위한 구조체
+struct game prev_game; // 이전 상태를 저장하기 위한 구조체
 int can_undo = 0; // undo 가능 여부를 나타내는 플래그
 
 void copy_game_state(struct game *dest, const struct game *src)
 {
-        memcpy(dest, src, sizeof(struct game));
+	memcpy(dest, src, sizeof(struct game));
 }
 
 void save_game_state(struct game *game)
 {
-        copy_game_state(&prev_game, game);
-        can_undo = 1;
+	copy_game_state(&prev_game, game);
+	can_undo = 1;
 }
 
 void undo_game_state(struct game *game)
 {
-        if (can_undo)
-        {
-                copy_game_state(game, &prev_game);
-                can_undo = 0;
-        }
+	if (can_undo)
+	{
+		copy_game_state(game, &prev_game);
+		can_undo = 0;
+	}
 }
 
-// place_tile() returns 0 if it did place a tile and -1 if there is no open
-// space.
 int place_tile(struct game *game, TileType tile_type)
 {
-	// lboard is the "linear board" -- no need to distinguish rows/cols
 	tile *lboard = (tile *)game->board;
 	int i, num_zeros = 0;
 
-	// Walk the board and count the number of empty tiles
+	// 빈 포인트 개수 새기
 	for (i = 0; i < NROWS * NCOLS; i++)
 	{
 		num_zeros += lboard[i] ? 0 : 1;
@@ -185,39 +194,40 @@ int place_tile(struct game *game, TileType tile_type)
 
 	if (!num_zeros)
 	{
+		// 빈 포인트가 없을 때는 -1을 반환
 		return -1;
 	}
 
-	// Choose the insertion point
+	// 타일 생성 포인트 선택
 	int loc = random() % num_zeros;
 
-	// Find the insertion point and place the new tile
+	// 새로운 타일 생성
 	for (i = 0; i < NROWS * NCOLS; i++)
 	{
 		if (!lboard[i] && !(loc--))
 		{
 			switch (tile_type)
 			{
-			case Number:
-				lboard[i] = 1;
-				return 0;
-			case Bomb:
-				lboard[i] = 15; // 폭탄 타일 (타일 넘버 15)
-				return 0;
-			case Chance:
-				if (random() % 10 < 1)
-				{
-					lboard[i] = 2;
-				}
-				else if (random() % 10 == 9)
-				{									// precentage of Chance: 1/10
-					lboard[i] = 16; // 찬스 타일 (타일 넘버 16)
-				}
-				else
-				{
+				case Number:
 					lboard[i] = 1;
-				}
-				return 0;
+					return 0;
+				case Bomb:
+					lboard[i] = 15; // 폭탄 타일 (타일 넘버 15)
+					return 0;
+				case Chance:
+					if (random() % 10 < 1)
+					{
+						lboard[i] = 2;
+					}
+					else if (random() % 10 == 9) // 찬스 등장 확률: 1/10
+					{
+						lboard[i] = 16; // 찬스 타일 (타일 넘버 16)
+					}
+					else
+					{
+						lboard[i] = 1;
+					}
+					return 0;
 			}
 		}
 	}
@@ -270,11 +280,13 @@ void print_game(const struct game *game)
 	printw("Score: %6d  Turns: %4d", game->score, game->turns);
 
 	struct timespec current_time;
-	clock_gettime(CLOCK_MONOTONIC, &current_time); //현재 시간 얻어오기
+	clock_gettime(CLOCK_MONOTONIC, &current_time); // 현재 시간 얻어오기
+
+	// 현재 시간과 시작 시간을 비교해서 경과된 시간 계산
 	elapsed_time = (current_time.tv_sec - start_time.tv_sec) +
 							(current_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
-	//현재 시간과 시작 시간을 비교해서 경과된 시간 계산
-	mvprintw(1,0,"Time: %.2f seconds", elapsed_time); //curse 라이브러리에 있는 print함수.. 그냥 printf쓰면 출력 위치 오류로 엄청난 오>
+
+	mvprintw(1,0,"Time: %.2f seconds", elapsed_time); // curse 라이브러리에 있는 print함수
 
 	for (r = 0; r < NROWS; r++) {
 		for (c = 0; c < NCOLS; c++) {
@@ -298,7 +310,7 @@ int combine_left(struct game *game, tile row[NCOLS])
 				row[c] = 0;
 				game->score += 4; // 점수 계산
 				did_combine = 1;
-				mvprintw(10, 0, "Combined 16 and 16 to 2, score: %d\n", game->score);
+				mvprintw(10, 0, "Combined chance and chance to 2, score: %d\n", game->score);
 			}
 			else if (row[c - 1] == row[c])
 			{
@@ -319,7 +331,7 @@ int combine_left(struct game *game, tile row[NCOLS])
 				row[c] = 0;
 				game->score += (1 << (combined_num + 1)); // 점수 계산 (2^(combined_num + 1))
 				did_combine = 1;
-				mvprintw(12, 0, "Combined chance and %d to %d, score: %d\n", combined_num, combined_num + 1, game->score);
+				mvprintw(12, 0, "Combined chance and %d to %d, score: %d\n", 1 << (combined_num), 1 << (combined_num + 1), game->score);
 			}
 		}
 	}
@@ -372,8 +384,7 @@ void move_left(struct game *game)
 		ret |= combine_left(game, row);
 		ret |= deflate_left(row);
 	}
-
-	game->turns += ret;
+		game->turns += ret;
 }
 
 void move_right(struct game *game)
@@ -403,7 +414,6 @@ void move_down(struct game *game)
 	rotate_clockwise(game);
 }
 
-// Pass by value because this function mutates the game
 int lose_game(struct game test_game)
 {
 	int start_turns = test_game.turns;
@@ -417,10 +427,10 @@ int lose_game(struct game test_game)
 void init_curses()
 {
 	int bg = 0;
-	initscr(); // curses init
+	initscr();
 	start_color();
-	cbreak(); // curses don't wait for enter key
-	noecho(); // curses don't echo the pressed key
+	cbreak();
+	noecho();
 	keypad(stdscr, TRUE);
 	timeout(100);
 	curs_set(0);
@@ -508,7 +518,7 @@ void load_high_score(int game_mode)
 	if (high_score_file)
 	{
 		fscanf(high_score_file, "%d", &high_score); // 파일에서 최고 기록 읽어오기
-		fclose(high_score_file);										// 파일 닫기
+		fclose(high_score_file); // 파일 닫기
 	}
 }
 
@@ -519,7 +529,7 @@ void save_high_score(int game_mode, int score)
 	if (high_score_file)
 	{
 		fprintf(high_score_file, "%d", score); // 파일에 최고 기록 쓰기
-		fclose(high_score_file);							 // 파일 닫기
+		fclose(high_score_file); // 파일 닫기
 	}
 }
 
@@ -568,9 +578,9 @@ void load_game(struct game *game, const char *filename)
 
 int main(int argc, char **argv)
 {
-  const char *exit_msg = "";
-  struct game game = {0};
-  struct game_record current_game_info;
+    const char *exit_msg = "";
+    struct game game = {0};
+  	struct game_record current_game_info;
 	int last_turn = game.turns;
 
 	time_t seed = time(NULL);
@@ -643,7 +653,7 @@ int main(int argc, char **argv)
 
 		if (lose_game(game)) 
     	{
-			// Stop the timer when the game is lost
+			// lose_game 시 게임 중단
 			struct timespec end_time;
 			clock_gettime(CLOCK_MONOTONIC, &end_time);
 			elapsed_time = (end_time.tv_sec - start_time.tv_sec) +
@@ -681,7 +691,7 @@ int main(int argc, char **argv)
 			case 'q':
 				exit_msg = "quit";
 				goto end;
-			case 'u': //이전 상태로 가기
+			case 'u': // 이전 상태로 가기
 				undo_game_state(&game);
                                 break;
 			case 'r': // 게임 재시작
@@ -728,7 +738,7 @@ int main(int argc, char **argv)
 
 			if (game.score > high_score) // 최고 기록을 갱신했다면?
 			{
-				high_score = game.score;								// 최고 기록 갱신
+				high_score = game.score; // 최고 기록 갱신
 				save_high_score(game_mode, high_score); // 해당 기록 파일에 저장
 				if (!batch_mode)
 				{
@@ -776,6 +786,6 @@ int main(int argc, char **argv)
 	{
 		printf("High score: %d\n", high_score); // 최고 기록 출력
 	}
-  	printf("Time played: %.2f seconds\n", elapsed_time); //진행 시간 출력
+  	printf("Time played: %.2f seconds\n", elapsed_time); // 진행 시간 출력
 	return 0;
 }
