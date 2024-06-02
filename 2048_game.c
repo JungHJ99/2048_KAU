@@ -748,36 +748,8 @@ int main(int argc, char **argv)
 		{
 			if (elapsed_time >= 120.00) // 120초가 되면 게임 종료
 			{
-				exit_msg = "timed out";
+				exit_msg = "Time over";
 				goto end;
-			}
-		}
-
-		if (game_mode == 5) // 2000점 빨리 얻는 모드
-		{
-			if (game.score >= 2000)
-			{
-				mvprintw(9, 0, "You reached 2000 points in %.2f seconds\nPress q to quit.", elapsed_time);
-				while (getch() != 'q');	
-				exit_msg = "won";
-				goto end;
-			}
-		}
-
-		if (game_mode == 6) // 100턴안에 1000점 만들기 모드
-		{
-			if (game.turns == 100)
-			{
-				if (game.score >= 1000)
-				{
-					exit_msg = "won";
-					goto end;
-				}
-				else 
-				{	
-					exit_msg = "lost";
-					goto lose;
-				}
 			}
 		}
 	}
