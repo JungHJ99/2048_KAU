@@ -3,7 +3,6 @@
 
 const char *GAME_RECORDS_FILE = "game_records.txt";
 
-// 게임 모드를 문자열로 변환하는 함수
 const char* get_mode_string(int mode) {
     switch (mode) 
 	{
@@ -104,20 +103,20 @@ void check_and_record_achievements(int score)
 	}
 }
 
-// 게임 상태 복사 함수
+struct game prev_game; // 이전 상태를 저장하기 위한 구조체
+int can_undo = 0; // undo 가능 여부를 나타내는 플래그
+
 void copy_game_state(struct game *dest, const struct game *src)
 {
 	memcpy(dest, src, sizeof(struct game));
 }
 
-// 게임 상태 저장 함수
 void save_game_state(struct game *game)
 {
 	copy_game_state(&prev_game, game);
 	can_undo = 1;
 }
 
-// 게임 상태 복구 함수
 void undo_game_state(struct game *game)
 {
 	if (can_undo)
@@ -127,7 +126,6 @@ void undo_game_state(struct game *game)
 	}
 }
 
-// 타일 생성 함수
 int place_tile(struct game *game, TileType tile_type)
 {
 	tile *lboard = (tile *)game->board;
@@ -181,48 +179,35 @@ int place_tile(struct game *game, TileType tile_type)
 	assert(0);
 }
 
-// 타일 출력 함수
-void print_tile(int tile)
-{
-	if (tile)
-	{
-		if (tile < 6)
-		{
-			attron(A_BOLD);
-		}
-		if (tile == 15) // 폭탄 타일 (타일 넘버 15)
-		{
-			int pair = COLOR_PAIR(7);
-			attron(pair);
-			attron(A_BOLD);
-			printw("   X");
-			attroff(pair);
-		}
-		else if (tile == 16) // 찬스 타일 (타일 넘버 16)
-		{
-			int pair = COLOR_PAIR(7);
-			attron(pair);
-			attron(A_BOLD);
-			printw("   O");
-			attroff(pair);
-		}
-		else
-		{
-			int pair = COLOR_PAIR(1 + (tile % 6));
-			attron(pair);
-			printw("%4d", 1 << tile);
-			attroff(pair);
-		}
-		attroff(A_BOLD);
-	}
-	else
-	{
-		printw("   .");
-	}
+void print_tile(int tile) {
+    int pair;
+
+    if (tile) {
+        if (tile == 15) { // 폭탄 타일
+            pair = COLOR_PAIR(8); // 새로운 색상 조합
+            attron(pair | A_BLINK); // 반짝이는 효과 추가
+            printw("   X");
+            attroff(pair | A_BLINK);
+        } else if (tile == 16) { // 찬스 타일
+            pair = COLOR_PAIR(9); // 또 다른 색상 조합
+            attron(pair | A_BOLD);
+            printw("   O");
+            attroff(pair | A_BOLD);
+        } else {
+            pair = COLOR_PAIR(1 + (tile % 6));
+            attron(pair);
+            if (tile > 10) attron(A_BLINK); // 값이 큰 타일에는 반짝이는 효과 추가
+            printw("%4d", 1 << tile);
+            attroff(pair | A_BLINK);
+        }
+        attroff(A_BOLD);
+    } else {
+        printw("   .");
+    }
 }
 
-// 게임 상태 출력 함수
-void print_game(const struct game *game)
+
+void print_game(const struct game* game)
 {
 	int r, c;
 	move(0, 0);
@@ -234,6 +219,7 @@ void print_game(const struct game *game)
 	// 현재 시간과 시작 시간을 비교해서 경과된 시간 계산
 	elapsed_time = (current_time.tv_sec - start_time.tv_sec) +
 							(current_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
+
 
 	mvprintw(1,0,"Time: %.2f seconds", elapsed_time); // curse 라이브러리에 있는 print함수
 
@@ -248,7 +234,6 @@ void print_game(const struct game *game)
   	refresh();
 }
 
-// 왼쪽으로 합치기 함수
 int combine_left(struct game *game, tile row[NCOLS])
 {
 	int c, did_combine = 0;
@@ -291,7 +276,6 @@ int combine_left(struct game *game, tile row[NCOLS])
 	return did_combine;
 }
 
-// 왼쪽으로 밀어내기 함수
 int deflate_left(tile row[NCOLS])
 {
 	tile buf[NCOLS] = {0};
@@ -312,7 +296,6 @@ int deflate_left(tile row[NCOLS])
 	return did_deflate;
 }
 
-// 시계 방향으로 회전 함수
 void rotate_clockwise(struct game *game)
 {
 	tile buf[NROWS][NCOLS];
@@ -328,7 +311,6 @@ void rotate_clockwise(struct game *game)
 	}
 }
 
-// 왼쪽으로 이동 함수
 void move_left(struct game *game)
 {
 	int r, ret = 0;
@@ -342,7 +324,6 @@ void move_left(struct game *game)
 		game->turns += ret;
 }
 
-// 오른쪽으로 이동 함수
 void move_right(struct game *game)
 {
 	rotate_clockwise(game);
@@ -352,7 +333,6 @@ void move_right(struct game *game)
 	rotate_clockwise(game);
 }
 
-// 위쪽으로 이동 함수
 void move_up(struct game *game)
 {
 	rotate_clockwise(game);
@@ -362,7 +342,6 @@ void move_up(struct game *game)
 	rotate_clockwise(game);
 }
 
-// 아래쪽으로 이동 함수
 void move_down(struct game *game)
 {
 	rotate_clockwise(game);
@@ -372,7 +351,6 @@ void move_down(struct game *game)
 	rotate_clockwise(game);
 }
 
-// 패배 조건 확인 함수
 int lose_game(struct game test_game)
 {
 	int start_turns = test_game.turns;
@@ -383,29 +361,29 @@ int lose_game(struct game test_game)
 	return test_game.turns == start_turns;
 }
 
-// 터미널 초기화 함수
 void init_curses()
 {
-	int bg = 0;
-	initscr();
-	start_color();
-	cbreak();
-	noecho();
-	keypad(stdscr, TRUE);
-	timeout(100);
-	curs_set(0);
+    int bg = 0;
+    initscr(); // curses 모드 시작
+    start_color(); 
+    cbreak();
+    noecho(); 
+    keypad(stdscr, TRUE); 
+    timeout(100); 
+    curs_set(0); 
 
-	bg = use_default_colors() == OK ? -1 : 0;
-	init_pair(1, COLOR_WHITE, bg);
-	init_pair(2, COLOR_GREEN, bg);
-	init_pair(3, COLOR_YELLOW, bg);
-	init_pair(4, COLOR_BLUE, bg);
-	init_pair(5, COLOR_MAGENTA, bg);
-	init_pair(6, COLOR_CYAN, bg);
-	init_pair(7, COLOR_RED, bg);
+    bg = use_default_colors() == OK ? -1 : 0; 
+
+    init_pair(1, COLOR_WHITE, COLOR_GREEN);
+    init_pair(2, COLOR_WHITE, COLOR_CYAN); 
+    init_pair(3, COLOR_WHITE, COLOR_MAGENTA); 
+    init_pair(4, COLOR_WHITE, COLOR_BLUE); 
+    init_pair(5, COLOR_WHITE, COLOR_YELLOW); 
+    init_pair(6, COLOR_WHITE, COLOR_RED); 
+    init_pair(7, COLOR_WHITE, bg);
+    init_pair(8, COLOR_WHITE, COLOR_RED); // 폭탄 타일용 밝은 빨간색 배경
+    init_pair(9, COLOR_WHITE, COLOR_BLUE); // 찬스 타일용 밝은 파란색 배경
 }
-
-// 최대 타일 값 가져오기 함수
 int max_tile(const tile *lboard)
 {
 	int i, ret = 0;
@@ -416,7 +394,6 @@ int max_tile(const tile *lboard)
 	return ret;
 }
 
-// 파일 열기 함수 (오류 발생 시 종료)
 FILE *fopen_or_die(const char *path, const char *mode)
 {
 	FILE *ret = fopen(path, mode);
@@ -428,7 +405,6 @@ FILE *fopen_or_die(const char *path, const char *mode)
 	return ret;
 }
 
-// 입력 받기 함수
 int get_input()
 {
 	if (playfile)
@@ -451,7 +427,6 @@ int get_input()
 	}
 }
 
-// 게임 기록 저장 함수
 void record(char key, const struct game *game)
 {
 	if (recfile)
@@ -460,7 +435,8 @@ void record(char key, const struct game *game)
 	}
 }
 
-// 게임 모드에 따른 최고 기록 파일 이름 반환 함수
+int high_score = 0; // 최고 기록을 저장하는 전역 변수
+
 const char *get_high_score_file_name(int game_mode)
 {
 	switch (game_mode)
@@ -476,7 +452,6 @@ const char *get_high_score_file_name(int game_mode)
 	}
 }
 
-// 최고 기록 불러오기 함수
 void load_high_score(int game_mode)
 {
 	const char *file_name = get_high_score_file_name(game_mode);
@@ -488,7 +463,6 @@ void load_high_score(int game_mode)
 	}
 }
 
-// 최고 기록 저장 함수
 void save_high_score(int game_mode, int score)
 {
 	const char *file_name = get_high_score_file_name(game_mode);
