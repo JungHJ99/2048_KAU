@@ -26,8 +26,8 @@ static const char *usage =
 
 int main(int argc, char **argv)
 {
-    const char *exit_msg = "";
-    struct game game = {0};
+    	const char *exit_msg = "";
+    	struct game game = {0};
   	struct game_record current_game_info;
 	int last_turn = game.turns;
 
@@ -72,9 +72,12 @@ int main(int argc, char **argv)
 	srandom(seed);
 	load_high_score(game_mode);
 
-	if (loadfile) { // loadfile 변수가 NULL이 아닌 경우
+	if (loadfile) // loadfile 변수가 NULL이 아닌 경우
+	{
 		load_game(&game, optarg); // 게임 상태 불러오기
-	} else {
+	}
+	else
+	{
 		place_tile(&game, Number);
 		if (game_mode == 2) // 폭탄 모드
 		{
@@ -100,7 +103,7 @@ int main(int argc, char **argv)
 		}
 
 		if (lose_game(game)) 
-    	{
+    		{
 			// lose_game 시 게임 중단
 			struct timespec end_time;
 			clock_gettime(CLOCK_MONOTONIC, &end_time);
@@ -149,7 +152,8 @@ int main(int argc, char **argv)
 				memset(game.board, 0, sizeof(game.board));
 				// 새로운 타일 생성
 				place_tile(&game, Number);
-				if(game_mode == 2) {
+				if(game_mode == 2)
+				{
 					place_tile(&game, Bomb);
 				}
 				place_tile(&game, Number);
@@ -225,8 +229,8 @@ int main(int argc, char **argv)
 					exit_msg = "won";
 					goto end;
 				}
-				else 
-				{	
+				else
+				{
 					exit_msg = "lost";
 					goto lose;
 				}
@@ -235,14 +239,6 @@ int main(int argc, char **argv)
 	}
 
 	lose:
-		 // 게임이 종료되면 해당 게임의 정보를 구성합니다.
-                current_game_info.score = game.score;
-                current_game_info.turns = game.turns;
-                current_game_info.elapsed_time = elapsed_time;
-                current_game_info.mode = game_mode;
-                // 해당 게임의 정보를 파일에 기록합니다.
-                record_game_info(current_game_info);
-
 		if (batch_mode)
 		{
 			return 0;
@@ -252,6 +248,14 @@ int main(int argc, char **argv)
 		printw("You lose! Press q to quit.");
 		while (getch() != 'q');
 	end:
+		// 게임이 종료되면 해당 게임의 정보를 구성합니다.
+                current_game_info.score = game.score;
+                current_game_info.turns = game.turns;
+                current_game_info.elapsed_time = elapsed_time;
+                current_game_info.mode = game_mode;
+                // 해당 게임의 정보를 파일에 기록합니다.
+                record_game_info(current_game_info);
+
 		if (batch_mode)
 		{
 			return 0;
