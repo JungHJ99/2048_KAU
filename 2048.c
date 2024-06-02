@@ -10,7 +10,10 @@ const char* get_mode_string(int mode)
         	case 1: return "Normal";
         	case 2: return "Bomb";
         	case 3: return "Chance";
-        	default: return "Normal";
+        	case 4: return "TimeAttack";
+		case 5: return "To 2000 score";
+		case 6: return "In 100, To 1000";
+		default: return "Normal";
     	}
 }
 
