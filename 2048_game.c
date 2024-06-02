@@ -263,7 +263,6 @@ void print_tile(int tile) {
             printw("   O");
             attroff(pair | A_BOLD);
         } else {
-            // 타일에 따라 다양한 색상 조합 사용
             pair = COLOR_PAIR(1 + (tile % 6));
             attron(pair);
             if (tile > 10) attron(A_BLINK); // 값이 큰 타일에는 반짝이는 효과 추가
@@ -277,7 +276,7 @@ void print_tile(int tile) {
 }
 
 
-void print_game(const struct game *game)
+void print_game(const struct game* game)
 {
 	int r, c;
 	move(0, 0);
@@ -431,27 +430,27 @@ int lose_game(struct game test_game)
 
 void init_curses()
 {
-	int bg = 0;
-	initscr();
-	start_color();
-	cbreak();
-	noecho();
-	keypad(stdscr, TRUE);
-	timeout(100);
-	curs_set(0);
+    int bg = 0;
+    initscr(); // curses 모드 시작
+    start_color(); 
+    cbreak();
+    noecho(); 
+    keypad(stdscr, TRUE); 
+    timeout(100); 
+    curs_set(0); 
 
-	bg = use_default_colors() == OK ? -1 : 0;
-	init_pair(1, COLOR_WHITE, COLOR_GREEN); 
+    bg = use_default_colors() == OK ? -1 : 0; 
+
+    init_pair(1, COLOR_WHITE, COLOR_GREEN);
     init_pair(2, COLOR_WHITE, COLOR_CYAN); 
-    init_pair(3, COLOR_WHITE, COLOR_MAGENTA);
+    init_pair(3, COLOR_WHITE, COLOR_MAGENTA); 
     init_pair(4, COLOR_WHITE, COLOR_BLUE); 
     init_pair(5, COLOR_WHITE, COLOR_YELLOW); 
-    init_pair(6, COLOR_WHITE, COLOR_RED);
-    init_pair(7, COLOR_WHITE, bg); 
+    init_pair(6, COLOR_WHITE, COLOR_RED); 
+    init_pair(7, COLOR_WHITE, bg);
     init_pair(8, COLOR_WHITE, COLOR_RED); // 폭탄 타일용 밝은 빨간색 배경
     init_pair(9, COLOR_WHITE, COLOR_BLUE); // 찬스 타일용 밝은 파란색 배경
 }
-
 int max_tile(const tile *lboard)
 {
 	int i, ret = 0;
