@@ -32,7 +32,8 @@ struct game
 };
 
 // 게임 기록 구조체
-struct game_record {
+struct game_record 
+{
         int score;
         int turns;
         double elapsed_time;

@@ -3,51 +3,53 @@
 
 const char *GAME_RECORDS_FILE = "game_records.txt";
 
-const char* get_mode_string(int mode) {
-    switch (mode) 
+const char* get_mode_string(int mode) 
+{
+	switch (mode) 
 	{
-        case 1: return "Normal";
-        case 2: return "Bomb";
-        case 3: return "Chance";
-        default: return "Normal";
-    }
+        	case 1: return "Normal";
+        	case 2: return "Bomb";
+        	case 3: return "Chance";
+        	default: return "Normal";
+    	}
 }
 
 // 게임 정보를 파일에 기록하는 함수
-void record_game_info(struct game_record game_info) {
-    FILE *record_file = fopen(GAME_RECORDS_FILE, "a"); // 기록 파일을 쓰기 모드로 열기
-    if (record_file != NULL) 
+void record_game_info(struct game_record game_info)
+{	FILE *record_file = fopen(GAME_RECORDS_FILE, "a"); // 기록 파일을 쓰기 모드로 열기
+    	if (record_file != NULL) 
 	{
-        // 게임 정보를 파일에 기록
-        fprintf(record_file, "Mode: %s, Score: %d, Turns: %d, Time: %.2f seconds\n",
-                get_mode_string(game_info.mode),game_info.score, game_info.turns, game_info.elapsed_time);
-        fclose(record_file); // 파일 닫기
-    } 
-	else 
+        	// 게임 정보를 파일에 기록
+        	fprintf(record_file, "Mode: %s, Score: %d, Turns: %d, Time: %.2f seconds\n",
+                	get_mode_string(game_info.mode),game_info.score, game_info.turns, game_info.elapsed_time);
+        	fclose(record_file); // 파일 닫기
+    	}
+	else
 	{
-        perror("Failed to open game records file");
-    }
+        	perror("Failed to open game records file");
+    	}
 }
 
 // 저장된 모든 게임 기록을 파일에서 읽어와서 출력하는 함수
-void show_all_game_records() {
-    FILE *record_file = fopen(GAME_RECORDS_FILE, "r"); // 기록 파일을 읽기 모드로 열기
-    if (record_file != NULL) 
+void show_all_game_records() 
+{
+    	FILE *record_file = fopen(GAME_RECORDS_FILE, "r"); // 기록 파일을 읽기 모드로 열기
+    	if (record_file != NULL) 
 	{
-        printf("All Game Records:\n");
-        char buffer[256]; // 한 줄씩 읽어올 버퍼
+        	printf("All Game Records:\n");
+        	char buffer[256]; // 한 줄씩 읽어올 버퍼
 
-        // 파일에서 한 줄씩 읽어와서 출력
-        while (fgets(buffer, sizeof(buffer), record_file) != NULL) 
+        	// 파일에서 한 줄씩 읽어와서 출력
+        	while (fgets(buffer, sizeof(buffer), record_file) != NULL) 
 		{
-            printf("%s", buffer);
-        }
+            		printf("%s", buffer);
+        	}
         fclose(record_file); // 파일 닫기
-    } 
-	else 
+    	}
+	else
 	{
-        perror("Failed to open game records file");
-    }
+        	perror("Failed to open game records file");
+    	}
 }
 
 // 업적을 파일에 기록하는 함수
@@ -180,30 +182,38 @@ int place_tile(struct game *game, TileType tile_type)
 }
 
 void print_tile(int tile) {
-    int pair;
+    	int pair;
 
-    if (tile) {
-        if (tile == 15) { // 폭탄 타일
-            pair = COLOR_PAIR(8); // 새로운 색상 조합
-            attron(pair | A_BLINK); // 반짝이는 효과 추가
-            printw("   X");
-            attroff(pair | A_BLINK);
-        } else if (tile == 16) { // 찬스 타일
-            pair = COLOR_PAIR(9); // 또 다른 색상 조합
-            attron(pair | A_BOLD);
-            printw("   O");
-            attroff(pair | A_BOLD);
-        } else {
-            pair = COLOR_PAIR(1 + (tile % 6));
-            attron(pair);
-            if (tile > 10) attron(A_BLINK); // 값이 큰 타일에는 반짝이는 효과 추가
-            printw("%4d", 1 << tile);
-            attroff(pair | A_BLINK);
-        }
+    	if (tile)
+	{
+        	if (tile == 15) //폭탄 타일
+		{
+            		pair = COLOR_PAIR(8); // 새로운 색상 조합
+            		attron(pair | A_BLINK); // 반짝이는 효과 추가
+            		printw("   X");
+            		attroff(pair | A_BLINK);
+        	}
+		else if (tile == 16) // 찬스 타일
+            	{
+			pair = COLOR_PAIR(9); // 또 다른 색상 조합
+            		attron(pair | A_BOLD);
+            		printw("   O");
+            		attroff(pair | A_BOLD);
+        	}
+		else
+		{
+            		pair = COLOR_PAIR(1 + (tile % 6));
+            		attron(pair);
+            		if (tile > 10) attron(A_BLINK); // 값이 큰 타일에는 반짝이는 효과 추가
+            		printw("%4d", 1 << tile);
+            		attroff(pair | A_BLINK);
+        	}
         attroff(A_BOLD);
-    } else {
-        printw("   .");
-    }
+	}
+	else
+ 	{
+        	printw("   .");
+    	}
 }
 
 
@@ -513,6 +523,5 @@ void load_game(struct game *game, const char *filename)
 			fscanf(fp, "%d ", &game->board[r][c]);
 		}
 	}
-	
 	fclose(fp);
 }
