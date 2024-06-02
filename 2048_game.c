@@ -234,44 +234,34 @@ int place_tile(struct game *game, TileType tile_type)
 	assert(0);
 }
 
-void print_tile(int tile)
-{
-	if (tile)
-	{
-		if (tile < 6)
-		{
-			attron(A_BOLD);
-		}
-		if (tile == 15) // 폭탄 타일 (타일 넘버 15)
-		{
-			int pair = COLOR_PAIR(7);
-			attron(pair);
-			attron(A_BOLD);
-			printw("   X");
-			attroff(pair);
-		}
-		else if (tile == 16) // 찬스 타일 (타일 넘버 16)
-		{
-			int pair = COLOR_PAIR(7);
-			attron(pair);
-			attron(A_BOLD);
-			printw("   O");
-			attroff(pair);
-		}
-		else
-		{
-			int pair = COLOR_PAIR(1 + (tile % 6));
-			attron(pair);
-			printw("%4d", 1 << tile);
-			attroff(pair);
-		}
-		attroff(A_BOLD);
-	}
-	else
-	{
-		printw("   .");
-	}
+void print_tile(int tile) {
+    int pair;
+
+    if (tile) {
+        if (tile == 15) { // 폭탄 타일
+            pair = COLOR_PAIR(8); // 새로운 색상 조합
+            attron(pair | A_BLINK); // 반짝이는 효과 추가
+            printw("   X");
+            attroff(pair | A_BLINK);
+        } else if (tile == 16) { // 찬스 타일
+            pair = COLOR_PAIR(9); // 또 다른 색상 조합
+            attron(pair | A_BOLD);
+            printw("   O");
+            attroff(pair | A_BOLD);
+        } else {
+            // 타일에 따라 다양한 색상 조합 사용
+            pair = COLOR_PAIR(1 + (tile % 6));
+            attron(pair);
+            if (tile > 10) attron(A_BLINK); // 값이 큰 타일에는 반짝이는 효과 추가
+            printw("%4d", 1 << tile);
+            attroff(pair | A_BLINK);
+        }
+        attroff(A_BOLD);
+    } else {
+        printw("   .");
+    }
 }
+
 
 void print_game(const struct game *game)
 {
@@ -438,13 +428,15 @@ void init_curses()
 	curs_set(0);
 
 	bg = use_default_colors() == OK ? -1 : 0;
-	init_pair(1, COLOR_WHITE, bg);
-	init_pair(2, COLOR_GREEN, bg);
-	init_pair(3, COLOR_YELLOW, bg);
-	init_pair(4, COLOR_BLUE, bg);
-	init_pair(5, COLOR_MAGENTA, bg);
-	init_pair(6, COLOR_CYAN, bg);
-	init_pair(7, COLOR_RED, bg);
+	init_pair(1, COLOR_WHITE, COLOR_GREEN); 
+    init_pair(2, COLOR_WHITE, COLOR_CYAN); 
+    init_pair(3, COLOR_WHITE, COLOR_MAGENTA);
+    init_pair(4, COLOR_WHITE, COLOR_BLUE); 
+    init_pair(5, COLOR_WHITE, COLOR_YELLOW); 
+    init_pair(6, COLOR_WHITE, COLOR_RED);
+    init_pair(7, COLOR_WHITE, bg); 
+    init_pair(8, COLOR_WHITE, COLOR_RED); // 폭탄 타일용 밝은 빨간색 배경
+    init_pair(9, COLOR_WHITE, COLOR_BLUE); // 찬스 타일용 밝은 파란색 배경
 }
 
 int max_tile(const tile *lboard)
