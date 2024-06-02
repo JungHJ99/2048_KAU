@@ -1,0 +1,1 @@
+Mode: Normal, Score: 2208, Turns: 198, Time: 38.07 seconds
