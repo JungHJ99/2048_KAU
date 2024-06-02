@@ -1,4 +1,6 @@
+
 Mode: Normal, Score: 712, Turns: 100, Time: 1422.69 seconds
 Mode: Normal, Score: 2448, Turns: 221, Time: 66.96 seconds
 Mode: Normal, Score: 3156, Turns: 274, Time: 98.59 seconds
 Mode: Normal, Score: 2052, Turns: 203, Time: 120.38 seconds
+
