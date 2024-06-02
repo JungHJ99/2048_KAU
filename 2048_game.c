@@ -64,7 +64,10 @@ const char* get_mode_string(int mode) {
         case 1: return "Normal";
         case 2: return "Bomb";
         case 3: return "Chance";
-        default: return "Normal";
+        case 4: return "TimeAttack";
+	case 5: return "To 2000 score";
+	case 6: return "In 100, To 1000";
+	default: return "Normal";
     }
 }
 
@@ -791,14 +794,6 @@ int main(int argc, char **argv)
 	}
 
 	lose:
-		 // 게임이 종료되면 해당 게임의 정보를 구성합니다.
-                current_game_info.score = game.score;
-                current_game_info.turns = game.turns;
-                current_game_info.elapsed_time = elapsed_time;
-                current_game_info.mode = game_mode;
-                // 해당 게임의 정보를 파일에 기록합니다.
-                record_game_info(current_game_info);
-
 		if (batch_mode)
 		{
 			return 0;
@@ -808,6 +803,14 @@ int main(int argc, char **argv)
 		printw("You lose! Press q to quit.");
 		while (getch() != 'q');
 	end:
+  		// 게임이 종료되면 해당 게임의 정보를 구성합니다.
+                current_game_info.score = game.score;
+                current_game_info.turns = game.turns;
+                current_game_info.elapsed_time = elapsed_time;
+                current_game_info.mode = game_mode;
+                // 해당 게임의 정보를 파일에 기록합니다.
+                record_game_info(current_game_info);
+
 		if (batch_mode)
 		{
 			return 0;
