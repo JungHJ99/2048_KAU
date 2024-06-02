@@ -2,7 +2,6 @@
 
 // 전역 변수 정의
 struct game prev_game;
-int can_undo = 0;
 FILE *recfile = NULL;
 FILE *playfile = NULL;
 FILE *loadfile = NULL;
@@ -10,7 +9,6 @@ int batch_mode;
 int delay_ms = 250;
 struct timespec start_time;
 double elapsed_time = 0;
-int high_score = 0;
 
 // 사용법 문자열
 static const char *usage =
@@ -202,8 +200,36 @@ int main(int argc, char **argv)
 		{
 			if (elapsed_time >= 120.00) // 120초가 되면 게임 종료
 			{
-				exit_msg = "Time over";
+				exit_msg = "timed out";
 				goto end;
+			}
+		}
+
+		if (game_mode == 5) // 2000점 빨리 얻는 모드
+		{
+			if (game.score >= 2000)
+			{
+				mvprintw(9, 0, "You reached 2000 points in %.2f seconds\nPress q to quit.", elapsed_time);
+				while (getch() != 'q');	
+				exit_msg = "won";
+				goto end;
+			}
+		}
+
+		if (game_mode == 6) // 100턴안에 1000점 만들기 모드
+		{
+			if (game.turns == 100)
+			{
+				if (game.score >= 1000)
+				{
+					exit_msg = "won";
+					goto end;
+				}
+				else 
+				{	
+					exit_msg = "lost";
+					goto lose;
+				}
 			}
 		}
 	}
