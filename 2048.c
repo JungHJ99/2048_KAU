@@ -493,7 +493,7 @@ void save_game(struct game *game, const char *filename)
 	FILE *fp = fopen(filename, "w");
 	if (fp == NULL)
 	{
-		perror("Error opening file");
+		perror("Error saving file");
 		return;
 	}
 	fprintf(fp, "%d %d\n", game->turns, game->score);
@@ -505,7 +505,6 @@ void save_game(struct game *game, const char *filename)
 		}
 		fprintf(fp, "\n");
 	}
-
 	fclose(fp);
 }
 
