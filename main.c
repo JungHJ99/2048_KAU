@@ -163,15 +163,13 @@ int main(int argc, char **argv)
 			case 'l': // 게임 저장
 				if (!batch_mode)
 				{
-					move(8, 0);
-					printw("Enter file name: ");
-					echo();
-					getstr(file_name);
-					noecho();
-					save_game(&game, file_name); // 게임 상태 저장
-					move(8, 0);
-					printw("                                 "); // 파일 이름 입력창 지우기
-					refresh();
+					endwin(); // curses 모드 비활성화
+					printf("Enter file name: ");
+					fgets(file_name, sizeof(file_name), stdin);
+					file_name[strcspn(file_name, "\n")] = 0;
+					save_game(&game, file_name);
+					init_curses(); // curses 모드 활성화
+					goto end;
 				}
 				break;
 		}
