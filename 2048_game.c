@@ -72,7 +72,7 @@ int place_tile(struct game *game)
 	assert(0);
 }
 
-/*void print_tile(int tile)
+void print_tile(int tile)
 void print_tile(int tile)
 {
 	if (tile) {
@@ -81,29 +81,9 @@ void print_tile(int tile)
 	else {
 		printw("   .");
 	}
-}*/
-
-void print_tileGUI(int row, int col, int tile)
-{
-    int start_row = row * 3 + 2;
-    int start_col = col * 5;
-
-    if (tile) {
-        if (tile < 6)
-            attron(A_BOLD);
-        int pair = COLOR_PAIR(1 + (tile % 6));
-        attron(pair);
-        mvprintw(start_row, start_col, "+----+");
-        mvprintw(start_row + 1, start_col, "|%4d|", 1 << tile);
-        mvprintw(start_row + 2, start_col, "+----+");
-        attroff(pair);
-        attroff(A_BOLD);
-    } else {
-        mvprintw(start_row, start_col, "+----+");
-        mvprintw(start_row + 1, start_col, "|    |");
-        mvprintw(start_row + 2, start_col, "+----+");
-    }
 }
+
+
 
 
 void print_game(const struct game *game)
