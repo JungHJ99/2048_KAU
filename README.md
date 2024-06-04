@@ -27,7 +27,7 @@
 
 실제 게임은 화려한 8가지 색상을 사용합니다. 다음은 플레이 화면 스크린샷입니다:
 
-![2048 Screenshot](screenshot.gif)
+![screenshot](https://github.com/JungHJ99/2048_KAU/assets/64583540/c20541be-5179-4289-a4b3-a23e69e9c1ae)
 
 게임을 플레이하려면 다음 명령어를 사용하세요.
 
