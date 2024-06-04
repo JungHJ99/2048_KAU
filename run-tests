@@ -3,10 +3,30 @@
 for RUN in test-data/*
 do
     TESTFILE=$(mktemp)
+    echo "Running test case in $RUN"
+    echo "Seed: $(cat "$RUN/seed")"
     ./2048 -s "$(cat "$RUN/seed")" -p "$RUN/in" -r "$TESTFILE"
-    if ! diff "$RUN/out" "$TESTFILE"
-    then
-        echo Test failed
+    
+    # Display the output for debugging
+    echo "Expected output:"
+    cat "$RUN/out"
+    echo "Actual output:"
+    cat "$TESTFILE"
+    
+    # Check for differences
+    diff "$RUN/out" "$TESTFILE"
+    DIFF_RESULT=$?
+    
+    if [ $DIFF_RESULT -ne 0 ]; then
+        echo "Test failed for $RUN"
+        echo "Differences:"
+        diff -u "$RUN/out" "$TESTFILE"
         exit 1
+    else
+        echo "Test passed for $RUN"
     fi
+    
+    rm "$TESTFILE"
 done
+
+echo "All tests passed"
