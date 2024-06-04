@@ -72,16 +72,22 @@ int place_tile(struct game *game)
 	assert(0);
 }
 
-void print_tile(int tile)
-void print_tile(int tile)
-{
+
+void print_tile(int tile) {
 	if (tile) {
 		if (tile < 6)
-@ -85,45 +85,22 @@ int place_tile(struct game *game)
+			attron(A_BOLD);
+		int pair = COLOR_PAIR(1 + (tile % 6));
+		attron(pair);
+		printw("%4d", 1 << tile);
+		attroff(pair);
+		attroff(A_BOLD);
+	}
 	else {
 		printw("   .");
 	}
 }
+
 
 
 
