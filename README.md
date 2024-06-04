@@ -1,45 +1,60 @@
 2048 Game in the Terminal
 =====
 
+목표는 1024 타일 두 개를 결합하여 궁극의 2048 타일을 만드는 것입니다. 
+이는 두 개의 512 타일을 결합하여 만들어지며, 512 타일은 무작위로 떨어지는 2와 4 타일을 결합하여 만들어집니다.
+
+타일을 결합하려면 모든 조각을 위, 아래, 왼쪽 또는 오른쪽으로 슬라이드해야 합니다. 
+각 슬라이드는 한 턴으로 계산됩니다. 
+동일한 값의 두 타일이 함께 슬라이드되면, 이들은 결합되고, 동일한 행/열과 동일한 방향으로 슬라이드된 타일들이 남긴 빈 공간을 채웁니다. 
+하나의 슬라이드로 각 행/열에서 하나 이상의 타일 쌍이 결합될 수 있습니다.
+
+유효한 움직임은 최소한 하나의 타일을 결합하거나, 최소한 하나의 타일을 움직여야 합니다. 
+각 유효한 움직임 후에는 2 타일이 무작위로 선택된 빈 공간에 배치됩니다. 
+빈 공간은 이전 턴에 새로 비워진 공간일 수 있습니다.
+
+점수는 모든 타일 결합 값의 합입니다.
+
+더 이상 움직일 수 없을 때 게임은 종료됩니다.
+
+컨트롤은 Vim 스타일 또는 화살표 키입니다:
+
+- `h` 또는 왼쪽 방향키: 보드의 타일을 왼쪽으로 슬라이드
+- `j` 또는 아래쪽 방향키: 아래로 슬라이드
+- `k` 또는 윗쪽 방향키: 위로 슬라이드
+- `l` 또는 오른쪽 방향키: 오른쪽으로 슬라이드
+- `q`: 종료
+
+실제 게임은 화려한 8가지 색상을 사용합니다. 다음은 플레이 화면 스크린샷입니다:
+
 ![2048 Screenshot](screenshot.gif)
 
-Sliding tile puzzle game in the terminal. The goal is to build the elusive
-`2048` tile by combining two `1024` tiles, which is in turn produced by
-combining two `512` tiles, which are built up from randomly dropped `2` and
-`4` tiles.
-
-To combine tiles, slide all the pieces up, down, left or right.  Each slide
-counts as one turn. When two tiles with the same value slide together, they
-combine, leaving an empty space filled by the tiles sliding in the same
-row/column and in the same direction. A slide may combine more than one pair
-of tiles in each row/column.
-
-Valid moves must either combine at least one tile, or move at least one
-tile. After each valid move, either a `2` tile (90% chance) or a `4` tile
-(10% chance) will be placed in a randomly chosen empty space. The empty
-space may be newly emptied in the previous turn.
-
-The score is simply the summation of the value of all tile combinations.
-
-The game is over when no moves are possible.
-
-The controls are Vim-like or arrow keys:
-
-* `h` slides the tiles to the left of the board
-* `j` slides down
-* `k` slides up
-* `l` slides right
-* `q` quits
-
-The real game uses a luscious 8 colors in two brighnesses (normal and bright).
-Here's a monochrome screenshot:
+게임을 플레이하려면 다음 명령어를 사용하세요.
 
 ```
-Score:    122  Turns:   40
-                          
-   .    .    .   16       
-   .    .    4   32       
-   .    2   16    8       
-   4    8    4    2
+gcc -o 2048 main.c 2048.c -lncurses -lm
+./2048
 ```
+
+추가로 다섯 가지 모드를 더 플레이할 수 있습니다.
+다음은 모드를 플레이하는 명령어입니다.
+
+```
+./2048 -m [Mode_NUM: 1, 2, 3, 4, 5, 6]
+```
+
+모드는 1번부터 6번까지 선택할 수 있으며, 모드 1과 default는 일반적인 2048 게임입니다.
+특수 모드는 2번부터 시작됩니다.
+
+2번 모드는 `폭탄 모드입`니다. 폭탄 모드는 칸 하나에 폭탄을 추가합니다. 
+폭탄은 슬라이드 시 숫자와 함께 이동하지만 어떤 숫자와도 합쳐지지 않습니다. 폭탄은 X로 표현됩니다.
+
+3번 모드는 `찬스 모드입`니다. 찬스 모드는 10%의 확률로 한 번 씩 숫자 대신 찬스가 나옵니다. 
+찬스는 모든 숫자와 합쳐집니다. 찬스는 0으로 표현됩니다. 
+
+4번 모드는 `타임어택` 모드입니다. 타임어택 모드는 120초가 지나면 게임이 끝납니다. 시간 안에 최고의 점수를 달성하세요!
+
+5번 모드는 `2000점 빨리 얻기` 모드입니다. 이 모드는 2000점을 달성했을 경우 플레이 했던 시간을 출력합니다.
+
+6번 모드는 `제한된 턴수` 모드입니다. 이 모드는 100턴 안에 1000점을 획득해야 승리합니다. 
 
