@@ -354,3 +354,4 @@ end:
 		1 << max_tile((tile *)game.board));
 	return 0;
 }
+
